@@ -40,34 +40,34 @@ public class LayoutsManager : LayoutsManagerBase
                 AddSymbolToExpression("0");
                 break;
             case "OneButton":
-                AddSymbolToExpression("0");
+                AddSymbolToExpression("1");
                 break;
             case "TwoButton":
-                AddSymbolToExpression("0");
+                AddSymbolToExpression("2");
                 break;
             case "ThreeButton":
-                AddSymbolToExpression("0");
+                AddSymbolToExpression("3");
                 break;
             case "FourButton":
-                AddSymbolToExpression("0");
+                AddSymbolToExpression("4");
                 break;
             case "FiveButton":
-                AddSymbolToExpression("0");
+                AddSymbolToExpression("5");
                 break;
             case "SixButton":
-                AddSymbolToExpression("0");
+                AddSymbolToExpression("6");
                 break;
             case "SevenButton":
-                AddSymbolToExpression("0");
+                AddSymbolToExpression("7");
                 break;
             case "EightButton":
-                AddSymbolToExpression("0");
+                AddSymbolToExpression("8");
                 break;
             case "NineButton":
-                AddSymbolToExpression("0");
+                AddSymbolToExpression("9");
                 break;
             case "DotButton":
-                AddSymbolToExpression("0");
+                AddSymbolToExpression(".");
                 break;
             case "CEButton":
                 //Replace last part of expression to 0
@@ -118,23 +118,26 @@ public class LayoutsManager : LayoutsManagerBase
 
     private void ZeroOutLastPartOfExpression()
     {
-        int lastPart;
-        string[] splittedExpression = Expression.Split(Regex.Match(Expression, "[-+*/]").Value.ToCharArray());
+        char operation = Regex.Match(Expression, RegexPattern).Value.FirstOrDefault();
+        string[] splittedExpression = Expression.Split(operation);
 
         splittedExpression[1] = "0";
-        Expression = $"{splittedExpression[0]}{splittedExpression[1]}";
+        Expression = $"{splittedExpression[0]}{operation}{splittedExpression[1]}";
     }
+
+    private string firstPart;
+    private string secondPart;
 
     private void AddSymbolToExpression(string symbol)
     {
         int number;
         int lastSymbol;
 
-        //If symbol is digit
-        if (int.TryParse(symbol, out number))
+        //If last symbol of expression is digit
+        if (int.TryParse(Expression.Last().ToString(), out lastSymbol))
         {
-            //If last symbol of expression is digit
-            if (int.TryParse(Expression.Last().ToString(), out lastSymbol))
+            //If symbol is digit
+            if (int.TryParse(symbol, out number))
             {
                 if (lastSymbol.Equals(0))
                 {
@@ -147,7 +150,7 @@ public class LayoutsManager : LayoutsManagerBase
             }
             else
             {
-                Expression = $"{Expression}{number}";
+
             }
         }
     }

@@ -30,6 +30,9 @@ public abstract class LayoutsManagerBase : MonoBehaviour
         }
     }
 
+    private string pattern = "[-+*/]";
+    public string RegexPattern { get; }
+
     internal virtual void ChangeActiveLayout()
     {
 
