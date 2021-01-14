@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ButtonsBehaviour : MonoBehaviour
+public class BackgroundLayoutButtonsBehaviour : MonoBehaviour
 {
     [SerializeField] private GameObject standartCalcCanvas;
     [SerializeField] private GameObject buttonsLayout;
@@ -36,9 +36,9 @@ public class ButtonsBehaviour : MonoBehaviour
     {
         buttons[0].onClick
                   .AddListener(
-                                delegate 
-                                { 
-                                    ButtonClicked(0); 
+                                delegate
+                                {
+                                    ButtonClicked(0);
                                 });
 
         buttons[1].onClick
@@ -51,7 +51,7 @@ public class ButtonsBehaviour : MonoBehaviour
 
     private void ButtonClicked(int buttonIndex)
     {
-        
+
         if (buttonIndex == 0)
         {
             historyForeground.gameObject.SetActive(false);
