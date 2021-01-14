@@ -51,7 +51,6 @@ public class BackgroundLayoutButtonsBehaviour : MonoBehaviour
 
     private void ButtonClicked(int buttonIndex)
     {
-
         if (buttonIndex == 0)
         {
             historyForeground.gameObject.SetActive(false);
