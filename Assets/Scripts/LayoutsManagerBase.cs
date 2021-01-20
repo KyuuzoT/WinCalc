@@ -4,7 +4,6 @@ using UnityEngine;
 
 public abstract class LayoutsManagerBase : MonoBehaviour
 {
-    private Transform activeLayoutTransform;
     internal Transform ActiveLayoutTransform { get; set; }
 
     private string expression;
@@ -30,8 +29,29 @@ public abstract class LayoutsManagerBase : MonoBehaviour
         }
     }
 
-    private string pattern = "[-+*/]";
-    public string RegexPattern { get; }
+    private string pattern = "[-+*/=]";
+    public string RegexPattern 
+    { 
+        get
+        {
+            return pattern;
+        }
+    }
+
+    [SerializeField] private TMPro.TextMeshProUGUI calcSequence;
+
+    public TMPro.TextMeshProUGUI CalculationSequence 
+    { 
+        get
+        {
+            return calcSequence;
+        }
+        
+        set
+        {
+            calcSequence = value;
+        }
+    }
 
     internal virtual void ChangeActiveLayout()
     {

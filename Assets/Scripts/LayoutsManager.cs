@@ -5,13 +5,49 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Text.RegularExpressions;
+using System.Text;
 
 public class LayoutsManager : LayoutsManagerBase
 {
+    private List<Button> buttonsInternalPuroposeVar;
+    private void Awake()
+    {
+        Debug.Log(CalculationSequence);
+    }
+
+    private void Update()
+    {
+        if (!string.IsNullOrEmpty(Expression))
+        {
+            CalculationSequence.text = Expression;
+        }
+
+        ActiveLayoutTransform = GetCurrentActiveLayout();
+        SetButtonsBehaviour(GetButtons(ActiveLayoutTransform));
+    }
+
+    private Transform GetCurrentActiveLayout()
+    {
+        Transform active = default;
+        foreach (var item in transform.GetComponentsInChildren<Transform>())
+        {
+            if(item.name.Contains("Foreground"))
+            {
+                if(item.gameObject.activeSelf)
+                {
+                    active = item;
+                }
+            }
+        }
+
+        return active;
+    }
+
     internal override List<Button> GetButtons(Transform layoutTransform)
     {
         List<Button> buttonsOnLayout = new List<Button>();
         buttonsOnLayout.AddRange(layoutTransform.GetComponentsInChildren<Button>());
+        buttonsInternalPuroposeVar = new List<Button>(buttonsOnLayout);
         return buttonsOnLayout;
     }
 
@@ -22,14 +58,23 @@ public class LayoutsManager : LayoutsManagerBase
         //Hardcode part
         foreach (var item in buttonsOnLayout)
         {
+            item.onClick.RemoveAllListeners();
             item.onClick
                 .AddListener(
-                                delegate 
-                                { 
-                                    ButtonClicked(item.name); 
+                                delegate
+                                {
+                                    ButtonClicked(item.name);
                                 });
+
         }
-        throw new System.NotImplementedException();
+    }
+
+    private void OnDisable()
+    {
+        foreach (var btn in buttonsInternalPuroposeVar)
+        {
+            btn.onClick.RemoveAllListeners();
+        }
     }
 
     private void ButtonClicked(string name)
@@ -96,23 +141,96 @@ public class LayoutsManager : LayoutsManagerBase
                 AddOperationToExpression("/");
                 break;
             case "MultiplyButton":
-                AddOperationToExpression("/");
+                AddOperationToExpression("*");
                 break;
             case "MinusButton":
-                AddOperationToExpression("/");
+                AddOperationToExpression("-");
                 break;
             case "PlusButton":
-                AddOperationToExpression("/");
+                Debug.Log("+");
+                AddOperationToExpression("+");
                 break;
             case "EqualsButton":
-                AddSymbolToExpression("0");
+                var result = EvaluateExpression();
+                Expression = result;
                 break;
             case "PlusMinusButton":
-                AddSymbolToExpression("-");
+                Expression = PlusMinusProcessing();
+                Debug.Log("Out");
                 break;
             case "Expression":
                 AddSymbolToExpression("0");
                 break;
+        }
+    }
+
+    private string PlusMinusProcessing()
+    {
+        string[] splitted;
+        char operation;
+        SplitExpression(out splitted, out operation);
+
+        if(splitted.Length > 1)
+        {
+            splitted[1] = PlusMinusValidation(splitted[1]);
+            return $"{splitted[0]}{operation}{splitted[1]}";
+        }
+        splitted[0] = PlusMinusValidation(splitted[0]);
+        return $"{splitted[0]}{operation}";
+    }
+
+    private string EvaluateExpression()
+    {
+        string[] splitted;
+        char operation;
+        SplitExpression(out splitted, out operation);
+
+        float firstPart = 0.0f;
+        float secondPart = 0.0f;
+
+        if (!string.IsNullOrEmpty(splitted[0]))
+        {
+            if (!float.TryParse(splitted[0], out firstPart))
+            {
+                return "Unable to resolve input of first part!";
+            }
+        }
+        if (splitted.Length > 1)
+        {
+            if (!float.TryParse(splitted[1], out secondPart))
+            {
+                return "Unable to resolve input of second part!";
+            }
+        }
+
+        float result = ResolveOperation(firstPart, secondPart, operation);
+        return $"{result}";
+    }
+
+    private void SplitExpression(out string[] splitted, out char operation)
+    {
+        splitted = Regex.Split(Expression, RegexPattern);
+        operation = Regex.Match(Expression, RegexPattern).Value.FirstOrDefault();
+        foreach (var item in splitted)
+        {
+            Debug.Log($"Splitted: {item}\n");
+        }
+    }
+
+    private float ResolveOperation(float firstPart, float secondPart, char operation)
+    {
+        switch (operation)
+        {
+            case '+':
+                return firstPart + secondPart;
+            case '-':
+                return firstPart - secondPart;
+            case '*':
+                return firstPart * secondPart;
+            case '/':
+                return firstPart / secondPart;
+            default:
+                return 0.0f;
         }
     }
 
@@ -121,7 +239,7 @@ public class LayoutsManager : LayoutsManagerBase
         char operation = Regex.Match(Expression, RegexPattern).Value.FirstOrDefault();
         string[] splittedExpression = Expression.Split(operation);
 
-        if(splittedExpression.Length == 1)
+        if (splittedExpression.Length == 1)
         {
             splittedExpression[0] = "0";
             Expression = splittedExpression[0];
@@ -135,91 +253,33 @@ public class LayoutsManager : LayoutsManagerBase
 
     private void AddSymbolToExpression(string input)
     {
-        string firstPart = string.Empty;
-        string secondPart = string.Empty;
-        char operation = Regex.Match(Expression, RegexPattern).Value.FirstOrDefault();
-        string[] splittedExpression = Expression.Split(operation);
-
-        firstPart = splittedExpression[0];
-        if(splittedExpression.Length > 1)
+        Debug.Log("Regex: " + Regex.IsMatch(Expression, @"[a-zA-Z!]+"));
+        if(!Regex.IsMatch(Expression, @"[a-zA-Z!]+"))
         {
-            secondPart = splittedExpression[1];
-        }
-
-        if(input.Contains('.'))
-        {
-            firstPart = DotValidation(firstPart, input);
-            if(!string.IsNullOrEmpty(secondPart))
+            if (Expression.Equals("0"))
             {
-                secondPart = DotValidation(secondPart, input);
-            }
-        }
-        else if(input.Contains('0'))
-        {
-            firstPart = ZeroValidation(firstPart, input);
-            if (!string.IsNullOrEmpty(secondPart))
-            {
-                secondPart = DotValidation(secondPart, input);
-            }
-        }
-        else if(input.Contains('-'))
-        {
-            firstPart = PlusMinusValidation(firstPart, input);
-        }
-
-        Expression = $"{firstPart}{operation}{secondPart}";
-    }
-
-    private string PlusMinusValidation(string valStr, string input)
-    {
-        if(input.Contains('-'))
-        {
-            return $"{input}{valStr}";
-        }
-        return valStr;
-    }
-
-    private string ZeroValidation(string valStr, string input)
-    {
-        if(input.Contains('0'))
-        {
-            if(valStr.Contains('.'))
-            {
-                return $"{valStr}{0}";
-            }
-            else
-            {
-                if(valStr.Length == 1 && valStr.First().Equals('0'))
+                if (!Regex.IsMatch(input, RegexPattern))
                 {
-                    return valStr;
-                }
-
-                if(valStr.Length > 1)
-                {
-                    return $"{valStr}{input}";
+                    Expression = $"{input}";
+                    return;
                 }
             }
+            Expression = $"{Expression}{input}";
         }
-        throw new NotImplementedException();
     }
 
-    private string DotValidation(string valStr, string input)
+    private string PlusMinusValidation(string valStr)
     {
-        if (input.First().Equals('.') && valStr.Contains('.'))
+        if (valStr.Contains('-'))
         {
             return valStr;
         }
-        else if (input.First().Equals('.') && !valStr.Contains('.'))
-        {
-            return $"{valStr}{input}";
-        }
-
-        return valStr;
+        return $"-{valStr}";
     }
 
     private void AddOperationToExpression(string input)
     {
-        if(!Regex.IsMatch(Expression, RegexPattern))
+        if (!Regex.IsMatch(Expression, RegexPattern))
         {
             Expression = $"{Expression}{input}";
         }
@@ -228,4 +288,6 @@ public class LayoutsManager : LayoutsManagerBase
             return;
         }
     }
+
+
 }
