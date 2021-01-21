@@ -53,6 +53,36 @@ public abstract class LayoutsManagerBase : MonoBehaviour
         }
     }
 
+    [SerializeField] private TMPro.TextMeshProUGUI volumeFrom;
+
+    public TMPro.TextMeshProUGUI VolumeFrom
+    {
+        get
+        {
+            return volumeFrom;
+        }
+
+        set
+        {
+            volumeFrom = value;
+        }
+    }
+
+    [SerializeField] private TMPro.TextMeshProUGUI lengthFrom;
+
+    public TMPro.TextMeshProUGUI LengthFrom
+    {
+        get
+        {
+            return lengthFrom;
+        }
+
+        set
+        {
+            lengthFrom = value;
+        }
+    }
+
     internal virtual void ChangeActiveLayout()
     {
 

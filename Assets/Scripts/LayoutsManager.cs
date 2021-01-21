@@ -17,12 +17,24 @@ public class LayoutsManager : LayoutsManagerBase
 
     private void Update()
     {
+        ActiveLayoutTransform = GetCurrentActiveLayout();
+
         if (!string.IsNullOrEmpty(Expression))
         {
-            CalculationSequence.text = Expression;
+            if (ActiveLayoutTransform.tag.Equals("StandartCalc"))
+            {
+                CalculationSequence.text = Expression;
+            }
+            else if(ActiveLayoutTransform.tag.Equals("VolumeConverter"))
+            {
+                VolumeFrom.text = Expression;
+            }
+            else if(ActiveLayoutTransform.tag.Equals("LengthConverter"))
+            {
+                LengthFrom.text = Expression;
+            }
         }
 
-        ActiveLayoutTransform = GetCurrentActiveLayout();
         SetButtonsBehaviour(GetButtons(ActiveLayoutTransform));
     }
 
@@ -82,60 +94,60 @@ public class LayoutsManager : LayoutsManagerBase
         switch (name)
         {
             case "ZeroButton":
-                AddSymbolToExpression("0");
+                AddSymbolToExpressionBasedOnLayout("0");
                 break;
             case "OneButton":
-                AddSymbolToExpression("1");
+                AddSymbolToExpressionBasedOnLayout("1");
                 break;
             case "TwoButton":
-                AddSymbolToExpression("2");
+                AddSymbolToExpressionBasedOnLayout("2");
                 break;
             case "ThreeButton":
-                AddSymbolToExpression("3");
+                AddSymbolToExpressionBasedOnLayout("3");
                 break;
             case "FourButton":
-                AddSymbolToExpression("4");
+                AddSymbolToExpressionBasedOnLayout("4");
                 break;
             case "FiveButton":
-                AddSymbolToExpression("5");
+                AddSymbolToExpressionBasedOnLayout("5");
                 break;
             case "SixButton":
-                AddSymbolToExpression("6");
+                AddSymbolToExpressionBasedOnLayout("6");
                 break;
             case "SevenButton":
-                AddSymbolToExpression("7");
+                AddSymbolToExpressionBasedOnLayout("7");
                 break;
             case "EightButton":
-                AddSymbolToExpression("8");
+                AddSymbolToExpressionBasedOnLayout("8");
                 break;
             case "NineButton":
-                AddSymbolToExpression("9");
+                AddSymbolToExpressionBasedOnLayout("9");
                 break;
             case "DotButton":
-                AddSymbolToExpression(".");
+                AddSymbolToExpressionBasedOnLayout(".");
                 break;
             case "CEButton":
                 //Replace last part of expression to 0
                 ZeroOutLastPartOfExpression();
                 break;
             case "RemoveButton":
-                AddSymbolToExpression("0");
+                AddSymbolToExpressionBasedOnLayout("0");
                 break;
             case "PercentButton":
-                AddSymbolToExpression("0");
+                AddSymbolToExpressionBasedOnLayout("0");
                 break;
             case "CButton":
                 //Replace all expression to 0
                 Expression.Replace(Expression, "0");
                 break;
             case "FractionButton":
-                AddSymbolToExpression("0");
+                AddSymbolToExpressionBasedOnLayout("0");
                 break;
             case "SqPowButton":
-                AddSymbolToExpression("0");
+                AddSymbolToExpressionBasedOnLayout("0");
                 break;
             case "SqrtButton":
-                AddSymbolToExpression("0");
+                AddSymbolToExpressionBasedOnLayout("0");
                 break;
             case "DivideButton":
                 AddOperationToExpression("/");
@@ -159,7 +171,7 @@ public class LayoutsManager : LayoutsManagerBase
                 Debug.Log("Out");
                 break;
             case "Expression":
-                AddSymbolToExpression("0");
+                AddSymbolToExpressionBasedOnLayout("0");
                 break;
         }
     }
@@ -251,10 +263,15 @@ public class LayoutsManager : LayoutsManagerBase
         }
     }
 
-    private void AddSymbolToExpression(string input)
+    private void AddSymbolToExpressionBasedOnLayout(string input)
+    {
+        AddSymbolForStandartCalc(input);
+    }
+
+    private void AddSymbolForStandartCalc(string input)
     {
         Debug.Log("Regex: " + Regex.IsMatch(Expression, @"[a-zA-Z!]+"));
-        if(!Regex.IsMatch(Expression, @"[a-zA-Z!]+"))
+        if (!Regex.IsMatch(Expression, @"[a-zA-Z!]+"))
         {
             if (Expression.Equals("0"))
             {
@@ -288,6 +305,4 @@ public class LayoutsManager : LayoutsManagerBase
             return;
         }
     }
-
-
 }
