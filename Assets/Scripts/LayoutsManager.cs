@@ -9,6 +9,10 @@ using System.Text;
 
 public class LayoutsManager : LayoutsManagerBase
 {
+    private const float CubicCmToPints = 0.0021f;
+    private const float CubicCmToLitres = 0.001f;
+    private const float PintsToLitres = 0.47f;
+
     private List<Button> buttonsInternalPuroposeVar;
     private void Awake()
     {
@@ -28,6 +32,10 @@ public class LayoutsManager : LayoutsManagerBase
             else if(ActiveLayoutTransform.tag.Equals("VolumeConverter"))
             {
                 VolumeFrom.text = Expression;
+                var volumeTo = GetTMPComponent("VolumeTo");
+                var volumeFromDropDown = GetDropDownBasedOnName("VolumeFromDropDown");
+                var volumeToDropDown = GetDropDownBasedOnName("VolumeToDropDown");
+                volumeTo.text = ConvertFromTo(volumeFromDropDown, volumeToDropDown);
             }
             else if(ActiveLayoutTransform.tag.Equals("LengthConverter"))
             {
@@ -54,7 +62,6 @@ public class LayoutsManager : LayoutsManagerBase
 
         return active;
     }
-
     internal override List<Button> GetButtons(Transform layoutTransform)
     {
         List<Button> buttonsOnLayout = new List<Button>();
@@ -62,7 +69,6 @@ public class LayoutsManager : LayoutsManagerBase
         buttonsInternalPuroposeVar = new List<Button>(buttonsOnLayout);
         return buttonsOnLayout;
     }
-
     internal override void SetButtonsBehaviour(List<Button> buttons)
     {
         List<Button> buttonsOnLayout = new List<Button>(buttons);
@@ -80,15 +86,6 @@ public class LayoutsManager : LayoutsManagerBase
 
         }
     }
-
-    private void OnDisable()
-    {
-        foreach (var btn in buttonsInternalPuroposeVar)
-        {
-            btn.onClick.RemoveAllListeners();
-        }
-    }
-
     private void ButtonClicked(string name)
     {
         switch (name)
@@ -175,6 +172,132 @@ public class LayoutsManager : LayoutsManagerBase
                 break;
         }
     }
+
+    /// <summary>
+    /// VolumeFrom Dropdown options:
+    /// 1 - Cubic cm
+    /// 2 - Litres
+    /// 3 - Pints
+    /// 
+    /// VolumeTo Dropdown options:
+    /// 1 - Pints
+    /// 2 - Litres
+    /// 3 - Cubic cm
+    /// </summary>
+    /// <param name="volumeFromDropDown"></param>
+    /// <param name="volumeToDropDown"></param>
+    /// <returns></returns>
+    private string ConvertFromTo(Dropdown volumeFromDropDown, Dropdown volumeToDropDown)
+    {
+        int optionSelectedVolumeFrom = 0;
+        int optionSelectedVolumeTo = 0;
+        float result = 0;
+        float expressionPart = 0;
+        optionSelectedVolumeFrom = GetSelectedOption(volumeFromDropDown);
+        optionSelectedVolumeTo = GetSelectedOption(volumeToDropDown);
+        if(float.TryParse(Expression, out expressionPart))
+        {
+            //Cubic cm
+            if (optionSelectedVolumeFrom.Equals(0))
+            {
+                switch (optionSelectedVolumeTo)
+                {
+                    case 0:
+                        result = expressionPart*CubicCmToPints;
+                        break;
+                    case 1:
+                        result = expressionPart;
+                        break;
+                    case 2:
+                        result = expressionPart * CubicCmToLitres;
+                        break;
+                    default:
+                        result = 0.0f;
+                        break;
+                }
+            }
+            //Litres
+            else if(optionSelectedVolumeFrom.Equals(1))
+            {
+                switch (optionSelectedVolumeTo)
+                {
+                    case 0:
+                        result = expressionPart / PintsToLitres;
+                        break;
+                    case 1:
+                        result = expressionPart / CubicCmToLitres;
+                        break;
+                    case 2:
+                        result = expressionPart;
+                        break;
+                    default:
+                        result = 0.0f;
+                        break;
+                }
+            }
+            //Pints
+            else if(optionSelectedVolumeFrom.Equals(2))
+            {
+                switch (optionSelectedVolumeTo)
+                {
+                    case 0:
+                        result = expressionPart;
+                        break;
+                    case 1:
+                        result = expressionPart / CubicCmToPints;
+                        break;
+                    case 2:
+                        result = expressionPart * PintsToLitres;
+                        break;
+                    default:
+                        result = 0.0f;
+                        break;
+                }
+            }
+        }
+
+        return result.ToString();
+    }
+
+    private int GetSelectedOption(Dropdown targetDropdown)
+    {
+        int optionSelected = 0;
+        targetDropdown.onValueChanged.RemoveAllListeners();
+        targetDropdown.onValueChanged
+            .AddListener(
+                            delegate
+                            {
+                                DropDownValueHandler(targetDropdown, out optionSelected);
+                            });
+        return optionSelected;
+    }
+
+    private void DropDownValueHandler(Dropdown target, out int option)
+    {
+        option = target.value;
+    }
+
+    private Dropdown GetDropDownBasedOnName(string name)
+    {
+        return ActiveLayoutTransform.GetComponentsInChildren<Transform>().Where(x => x.name.Equals(name)).First().GetComponentInChildren<Dropdown>();
+    }
+
+    private TMPro.TextMeshProUGUI GetTMPComponent(string name)
+    {
+        return ActiveLayoutTransform.GetComponentsInChildren<Transform>().Where(x => x.name.Equals(name)).First().GetComponentInChildren<TMPro.TextMeshProUGUI>();
+    }
+
+
+
+
+    private void OnDisable()
+    {
+        foreach (var btn in buttonsInternalPuroposeVar)
+        {
+            btn.onClick.RemoveAllListeners();
+        }
+    }
+
 
     private string PlusMinusProcessing()
     {
@@ -265,7 +388,47 @@ public class LayoutsManager : LayoutsManagerBase
 
     private void AddSymbolToExpressionBasedOnLayout(string input)
     {
+        if (!ActiveLayoutTransform.tag.Equals("StandartCalc"))
+        {
+            AddSymbolForConverter(input);
+            return;
+        }
         AddSymbolForStandartCalc(input);
+    }
+
+    private void AddSymbolForConverter(string input)
+    {
+        if(ActiveLayoutTransform.tag.Equals("VolumeConverter"))
+        {
+            AddSymbolToVolumeConverter(input);
+        }
+        else
+        {
+            AddSymbolToLengthConverter(input);
+        }
+    }
+
+    private void AddSymbolToVolumeConverter(string input)
+    {
+        if (!Regex.IsMatch(Expression, @"[a-zA-Z!]+"))
+        {
+            if (Expression.Equals("0"))
+            {
+                Expression = $"{input}";
+            }
+            else
+            {
+                Expression = $"{Expression}{input}";
+            }
+        }
+
+        
+        throw new NotImplementedException();
+    }
+
+    private void AddSymbolToLengthConverter(string input)
+    {
+        throw new NotImplementedException();
     }
 
     private void AddSymbolForStandartCalc(string input)
