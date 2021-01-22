@@ -12,6 +12,7 @@ public class LayoutsManager : LayoutsManagerBase
     private const float CubicCmToPints = 0.0021f;
     private const float CubicCmToLitres = 0.001f;
     private const float PintsToLitres = 0.47f;
+    private int optionSelected = 0;
 
     private List<Button> buttonsInternalPuroposeVar;
     private void Awake()
@@ -197,6 +198,9 @@ public class LayoutsManager : LayoutsManagerBase
         optionSelectedVolumeTo = GetSelectedOption(volumeToDropDown);
         if(float.TryParse(Expression, out expressionPart))
         {
+            Debug.Log("Expression: " + expressionPart);
+            Debug.Log("optionSelectedVolumeTo: " + optionSelectedVolumeTo);
+            Debug.Log("optionSelectedVolumeFrom: " + optionSelectedVolumeFrom);
             //Cubic cm
             if (optionSelectedVolumeFrom.Equals(0))
             {
@@ -223,6 +227,7 @@ public class LayoutsManager : LayoutsManagerBase
                 {
                     case 0:
                         result = expressionPart / PintsToLitres;
+                        Debug.Log(result);
                         break;
                     case 1:
                         result = expressionPart / CubicCmToLitres;
@@ -259,22 +264,25 @@ public class LayoutsManager : LayoutsManagerBase
         return result.ToString();
     }
 
+
     private int GetSelectedOption(Dropdown targetDropdown)
     {
-        int optionSelected = 0;
+        int tmp = 0;
         targetDropdown.onValueChanged.RemoveAllListeners();
         targetDropdown.onValueChanged
             .AddListener(
                             delegate
                             {
-                                DropDownValueHandler(targetDropdown, out optionSelected);
+                                DropDownValueHandler(targetDropdown);
                             });
+
         return optionSelected;
     }
 
-    private void DropDownValueHandler(Dropdown target, out int option)
+    private void DropDownValueHandler(Dropdown target)
     {
-        option = target.value;
+        Debug.Log("Selected: " + target.value);
+        optionSelected = target.value;
     }
 
     private Dropdown GetDropDownBasedOnName(string name)
@@ -421,9 +429,6 @@ public class LayoutsManager : LayoutsManagerBase
                 Expression = $"{Expression}{input}";
             }
         }
-
-        
-        throw new NotImplementedException();
     }
 
     private void AddSymbolToLengthConverter(string input)
