@@ -40,21 +40,16 @@ public class BackgroundLayout : LayoutsManagerBase
 
     private void ButtonClicked(Button button)
     {
-        //button.interactable = false;
         var calcParent = transform.parent;
-        Debug.LogWarning("Parent: " + calcParent);
         switch (button.name)
         {
             case "StandartCalc":
-                Debug.LogWarning("Standart: " + calcParent.GetComponentsInChildren<Transform>(includeInactive: true).Where(x => x.name.Contains("ForegroundStandart")).FirstOrDefault());
                 ChangeActiveLayout(calcParent.GetComponentsInChildren<Transform>(includeInactive: true).Where(x => x.name.Contains("ForegroundStandart")).FirstOrDefault());
                 break;
             case "VolumeConverter":
-                Debug.LogWarning("Volume: " + calcParent.GetComponentsInChildren<Transform>(includeInactive: true).Where(x => x.name.Contains("ForegroundVolume")).FirstOrDefault());
                 ChangeActiveLayout(calcParent.GetComponentsInChildren<Transform>(includeInactive: true).Where(x => x.name.Contains("ForegroundVolume")).FirstOrDefault());
                 break;
             case "LengthConverter":
-                Debug.LogWarning("Length: " + calcParent.GetComponentsInChildren<Transform>(includeInactive: true).Where(x => x.name.Contains("ForegroundLength")).FirstOrDefault());
                 ChangeActiveLayout(calcParent.GetComponentsInChildren<Transform>(includeInactive: true).Where(x => x.name.Contains("ForegroundLength")).FirstOrDefault());
                 break;
             default:
@@ -77,11 +72,8 @@ public class BackgroundLayout : LayoutsManagerBase
             {
                 return;
             }
-            Debug.Log("Active: " + active);
-            Debug.Log("LayoutTransform: " + layoutTransform);
             active.gameObject.SetActive(false);
             layoutTransform.gameObject.SetActive(true);
-            Debug.Log("LayoutTransform: " + layoutTransform.gameObject.activeSelf);
         }
     }
 

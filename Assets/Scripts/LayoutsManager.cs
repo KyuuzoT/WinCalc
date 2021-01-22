@@ -26,7 +26,6 @@ public class LayoutsManager : LayoutsManagerBase
 
         if (!string.IsNullOrEmpty(Expression))
         {
-            //Debug.Log("ActiveLayoutTransform: " + ActiveLayoutTransform);
             if (ActiveLayoutTransform.tag.Equals("StandartCalc"))
             {
                 CalculationSequence.text = Expression;
@@ -136,23 +135,23 @@ public class LayoutsManager : LayoutsManagerBase
                 ZeroOutLastPartOfExpression();
                 break;
             case "RemoveButton":
-                AddSymbolToExpressionBasedOnLayout("0");
+                Expression = Expression.Substring(0, Expression.Length - 1);
                 break;
             case "PercentButton":
-                AddSymbolToExpressionBasedOnLayout("0");
+                AddSymbolToExpressionBasedOnLayout("%");
                 break;
             case "CButton":
                 //Replace all expression to 0
                 Expression = "0";
                 break;
             case "FractionButton":
-                AddSymbolToExpressionBasedOnLayout("0");
+                FractionResolving();
                 break;
             case "SqPowButton":
-                AddSymbolToExpressionBasedOnLayout("0");
+                SquarePowerResolving();
                 break;
             case "SqrtButton":
-                AddSymbolToExpressionBasedOnLayout("0");
+                SquareRootResolving();
                 break;
             case "DivideButton":
                 AddOperationToExpression("/");
@@ -175,9 +174,54 @@ public class LayoutsManager : LayoutsManagerBase
                 Expression = PlusMinusProcessing();
                 Debug.Log("Out");
                 break;
-            case "Expression":
-                AddSymbolToExpressionBasedOnLayout("0");
+            default:
+                Expression = "0";
                 break;
+        }
+    }
+
+    private void SquareRootResolving()
+    {
+        float tmp = 0.0f;
+        var culture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+        if (float.TryParse(Expression, System.Globalization.NumberStyles.Any, culture, out tmp))
+        {
+            if(tmp >= 0)
+            {
+                tmp = Mathf.Sqrt(tmp);
+            }
+
+            Expression = tmp.ToString();
+        }
+    }
+
+    private void SquarePowerResolving()
+    {
+        float tmp = 0.0f;
+        var culture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+
+        if (float.TryParse(Expression, System.Globalization.NumberStyles.Any, culture, out tmp))
+        {
+            tmp *= tmp;
+            Expression = tmp.ToString();
+        }
+    }
+
+    private void FractionResolving()
+    {
+        var culture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+
+        if (Expression.Equals("0"))
+        {
+            Expression = "Unable to resolve. Division by zero!";
+            return;
+        }
+
+        float tmp = 0;
+        if(float.TryParse(Expression, System.Globalization.NumberStyles.Any, culture, out tmp))
+        {
+            tmp = 1 / tmp;
+            Expression = tmp.ToString();
         }
     }
 
@@ -190,17 +234,6 @@ public class LayoutsManager : LayoutsManagerBase
         }
         AddSymbolForStandartCalc(input);
     }
-    //private void AddSymbolForConverter(string input)
-    //{
-    //    if (ActiveLayoutTransform.tag.Equals("VolumeConverter"))
-    //    {
-    //        AddSymbolToConverter(input);
-    //    }
-    //    else
-    //    {
-    //        AddSymbolToLengthConverter(input);
-    //    }
-    //}
 
     private void AddSymbolForStandartCalc(string input)
     {
@@ -215,6 +248,20 @@ public class LayoutsManager : LayoutsManagerBase
                     return;
                 }
             }
+            Expression = $"{Expression}{input}";
+        }
+    }
+
+    private void AddSymbolToConverter(string input)
+    {
+        if (!Regex.IsMatch(Expression, @"[a-zA-Z!]+"))
+        {
+            if (Expression.Equals("0"))
+            {
+                Expression = $"{input}";
+                return;
+            }
+
             Expression = $"{Expression}{input}";
         }
     }
@@ -253,20 +300,7 @@ public class LayoutsManager : LayoutsManagerBase
         }
     }
 
-    private void AddSymbolToConverter(string input)
-    {
-        if (!Regex.IsMatch(Expression, @"[a-zA-Z!]+"))
-        {
-            if (Expression.Equals("0"))
-            {
-                Expression = $"{input}";
-            }
-            else
-            {
-                Expression = $"{Expression}{input}";
-            }
-        }
-    }
+
     #endregion
 
     #region StandartCalc
@@ -294,16 +328,18 @@ public class LayoutsManager : LayoutsManagerBase
         float firstPart = 0.0f;
         float secondPart = 0.0f;
 
+        var culture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+
         if (!string.IsNullOrEmpty(splitted[0]))
         {
-            if (!float.TryParse(splitted[0], out firstPart))
+            if (!float.TryParse(splitted[0], System.Globalization.NumberStyles.Any, culture, out firstPart))
             {
                 return "Unable to resolve input of first part!";
             }
         }
         if (splitted.Length > 1)
         {
-            if (!float.TryParse(splitted[1], out secondPart))
+            if (!float.TryParse(splitted[1], System.Globalization.NumberStyles.Any, culture, out secondPart))
             {
                 return "Unable to resolve input of second part!";
             }
@@ -400,12 +436,13 @@ public class LayoutsManager : LayoutsManagerBase
     {
         float result = 0;
         float expressionPart = 0;
+        var culture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
         GetSelectedOption(volumeFromDropDown);
         GetSelectedOption(volumeToDropDown);
 
-
-        if (float.TryParse(Expression, out expressionPart))
+        if (float.TryParse(Expression, System.Globalization.NumberStyles.Any, culture, out expressionPart))
         {
+            Debug.Log("After parse: " + expressionPart);
             //Cubic cm
             if (optionVolumeSelectedFrom.Equals(0))
             {
@@ -490,11 +527,12 @@ public class LayoutsManager : LayoutsManagerBase
         float expressionPart = 0;
         GetSelectedOption(lengthFromDropDown);
         GetSelectedOption(lengthToDropDown);
+        var culture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
 
-        if(float.TryParse(Expression, out expressionPart))
+        if (float.TryParse(Expression, System.Globalization.NumberStyles.Any, culture, out expressionPart))
         {
             //Cm
-            if(optionLengthSelectedFrom.Equals(0))
+            if (optionLengthSelectedFrom.Equals(0))
             {
                 switch (optionLengthSelectedTo)
                 {
