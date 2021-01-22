@@ -2955,27 +2955,13 @@ MonoBehaviour:
     m_Options:
     - m_Text: Centimeters
       m_Image: {fileID: 0}
-    - m_Text: Nanometers
-      m_Image: {fileID: 0}
-    - m_Text: Microns
-      m_Image: {fileID: 0}
-    - m_Text: Millimeters
-      m_Image: {fileID: 0}
     - m_Text: Meters
-      m_Image: {fileID: 0}
-    - m_Text: Kilometers
       m_Image: {fileID: 0}
     - m_Text: Inches
       m_Image: {fileID: 0}
     - m_Text: Feet
       m_Image: {fileID: 0}
     - m_Text: Yards
-      m_Image: {fileID: 0}
-    - m_Text: Miles
-      m_Image: {fileID: 0}
-    - m_Text: Sea Miles
-      m_Image: {fileID: 0}
-    - m_Text: Paper Clips
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
@@ -3876,7 +3862,7 @@ GameObject:
   - component: {fileID: 508234330}
   - component: {fileID: 508234329}
   m_Layer: 0
-  m_Name: ZeroButton (1)
+  m_Name: ZeroButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10291,27 +10277,13 @@ MonoBehaviour:
     m_Options:
     - m_Text: Inches
       m_Image: {fileID: 0}
-    - m_Text: Centimeters
-      m_Image: {fileID: 0}
-    - m_Text: Nanometers
-      m_Image: {fileID: 0}
-    - m_Text: Microns
-      m_Image: {fileID: 0}
-    - m_Text: Millimeters
-      m_Image: {fileID: 0}
     - m_Text: Meters
-      m_Image: {fileID: 0}
-    - m_Text: Kilometers
       m_Image: {fileID: 0}
     - m_Text: Feet
       m_Image: {fileID: 0}
     - m_Text: Yards
       m_Image: {fileID: 0}
-    - m_Text: Miles
-      m_Image: {fileID: 0}
-    - m_Text: Sea Miles
-      m_Image: {fileID: 0}
-    - m_Text: Paper Clips
+    - m_Text: Centimeters
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
@@ -11004,7 +10976,7 @@ GameObject:
   - component: {fileID: 1355228958}
   - component: {fileID: 1355228957}
   m_Layer: 0
-  m_Name: DotButton (1)
+  m_Name: DotButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

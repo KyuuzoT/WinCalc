@@ -9,10 +9,10 @@ using System.Text;
 
 public class LayoutsManager : LayoutsManagerBase
 {
-    private const float CubicCmToPints = 0.0021f;
-    private const float CubicCmToLitres = 0.001f;
-    private const float PintsToLitres = 0.47f;
-    private int optionSelected = 0;
+    private int optionVolumeSelectedFrom = 0;
+    private int optionVolumeSelectedTo = 0;
+    private int optionLengthSelectedFrom = 0;
+    private int optionLengthSelectedTo = 0;
 
     private List<Button> buttonsInternalPuroposeVar;
     private void Awake()
@@ -30,31 +30,37 @@ public class LayoutsManager : LayoutsManagerBase
             {
                 CalculationSequence.text = Expression;
             }
-            else if(ActiveLayoutTransform.tag.Equals("VolumeConverter"))
+            else if (ActiveLayoutTransform.tag.Equals("VolumeConverter"))
             {
                 VolumeFrom.text = Expression;
                 var volumeTo = GetTMPComponent("VolumeTo");
                 var volumeFromDropDown = GetDropDownBasedOnName("VolumeFromDropDown");
                 var volumeToDropDown = GetDropDownBasedOnName("VolumeToDropDown");
-                volumeTo.text = ConvertFromTo(volumeFromDropDown, volumeToDropDown);
+                volumeTo.text = ConvertVolumeFromTo(volumeFromDropDown, volumeToDropDown);
             }
-            else if(ActiveLayoutTransform.tag.Equals("LengthConverter"))
+            else if (ActiveLayoutTransform.tag.Equals("LengthConverter"))
             {
                 LengthFrom.text = Expression;
+                var lengthTo = GetTMPComponent("LengthTo");
+                var lengthFromDropDown = GetDropDownBasedOnName("LengthFromDropDown");
+                var lengthToDropDown = GetDropDownBasedOnName("LengthToDropDown");
+                lengthTo.text = ConvertLengthFromTo(lengthFromDropDown, lengthToDropDown);
             }
         }
 
         SetButtonsBehaviour(GetButtons(ActiveLayoutTransform));
     }
 
+
+    #region LayoutBehaviour
     private Transform GetCurrentActiveLayout()
     {
         Transform active = default;
         foreach (var item in transform.GetComponentsInChildren<Transform>())
         {
-            if(item.name.Contains("Foreground"))
+            if (item.name.Contains("Foreground"))
             {
-                if(item.gameObject.activeSelf)
+                if (item.gameObject.activeSelf)
                 {
                     active = item;
                 }
@@ -136,7 +142,7 @@ public class LayoutsManager : LayoutsManagerBase
                 break;
             case "CButton":
                 //Replace all expression to 0
-                Expression.Replace(Expression, "0");
+                Expression = "0";
                 break;
             case "FractionButton":
                 AddSymbolToExpressionBasedOnLayout("0");
@@ -174,120 +180,42 @@ public class LayoutsManager : LayoutsManagerBase
         }
     }
 
-    /// <summary>
-    /// VolumeFrom Dropdown options:
-    /// 1 - Cubic cm
-    /// 2 - Litres
-    /// 3 - Pints
-    /// 
-    /// VolumeTo Dropdown options:
-    /// 1 - Pints
-    /// 2 - Litres
-    /// 3 - Cubic cm
-    /// </summary>
-    /// <param name="volumeFromDropDown"></param>
-    /// <param name="volumeToDropDown"></param>
-    /// <returns></returns>
-    private string ConvertFromTo(Dropdown volumeFromDropDown, Dropdown volumeToDropDown)
+    private void AddSymbolToExpressionBasedOnLayout(string input)
     {
-        int optionSelectedVolumeFrom = 0;
-        int optionSelectedVolumeTo = 0;
-        float result = 0;
-        float expressionPart = 0;
-        optionSelectedVolumeFrom = GetSelectedOption(volumeFromDropDown);
-        optionSelectedVolumeTo = GetSelectedOption(volumeToDropDown);
-        if(float.TryParse(Expression, out expressionPart))
+        if (!ActiveLayoutTransform.tag.Equals("StandartCalc"))
         {
-            Debug.Log("Expression: " + expressionPart);
-            Debug.Log("optionSelectedVolumeTo: " + optionSelectedVolumeTo);
-            Debug.Log("optionSelectedVolumeFrom: " + optionSelectedVolumeFrom);
-            //Cubic cm
-            if (optionSelectedVolumeFrom.Equals(0))
-            {
-                switch (optionSelectedVolumeTo)
-                {
-                    case 0:
-                        result = expressionPart*CubicCmToPints;
-                        break;
-                    case 1:
-                        result = expressionPart;
-                        break;
-                    case 2:
-                        result = expressionPart * CubicCmToLitres;
-                        break;
-                    default:
-                        result = 0.0f;
-                        break;
-                }
-            }
-            //Litres
-            else if(optionSelectedVolumeFrom.Equals(1))
-            {
-                switch (optionSelectedVolumeTo)
-                {
-                    case 0:
-                        result = expressionPart / PintsToLitres;
-                        Debug.Log(result);
-                        break;
-                    case 1:
-                        result = expressionPart / CubicCmToLitres;
-                        break;
-                    case 2:
-                        result = expressionPart;
-                        break;
-                    default:
-                        result = 0.0f;
-                        break;
-                }
-            }
-            //Pints
-            else if(optionSelectedVolumeFrom.Equals(2))
-            {
-                switch (optionSelectedVolumeTo)
-                {
-                    case 0:
-                        result = expressionPart;
-                        break;
-                    case 1:
-                        result = expressionPart / CubicCmToPints;
-                        break;
-                    case 2:
-                        result = expressionPart * PintsToLitres;
-                        break;
-                    default:
-                        result = 0.0f;
-                        break;
-                }
-            }
+            AddSymbolToConverter(input);
+            return;
         }
-
-        return result.ToString();
+        AddSymbolForStandartCalc(input);
     }
+    //private void AddSymbolForConverter(string input)
+    //{
+    //    if (ActiveLayoutTransform.tag.Equals("VolumeConverter"))
+    //    {
+    //        AddSymbolToConverter(input);
+    //    }
+    //    else
+    //    {
+    //        AddSymbolToLengthConverter(input);
+    //    }
+    //}
 
-
-    private int GetSelectedOption(Dropdown targetDropdown)
+    private void AddSymbolForStandartCalc(string input)
     {
-        int tmp = 0;
-        targetDropdown.onValueChanged.RemoveAllListeners();
-        targetDropdown.onValueChanged
-            .AddListener(
-                            delegate
-                            {
-                                DropDownValueHandler(targetDropdown);
-                            });
-
-        return optionSelected;
-    }
-
-    private void DropDownValueHandler(Dropdown target)
-    {
-        Debug.Log("Selected: " + target.value);
-        optionSelected = target.value;
-    }
-
-    private Dropdown GetDropDownBasedOnName(string name)
-    {
-        return ActiveLayoutTransform.GetComponentsInChildren<Transform>().Where(x => x.name.Equals(name)).First().GetComponentInChildren<Dropdown>();
+        Debug.Log("Regex: " + Regex.IsMatch(Expression, @"[a-zA-Z!]+"));
+        if (!Regex.IsMatch(Expression, @"[a-zA-Z!]+"))
+        {
+            if (Expression.Equals("0"))
+            {
+                if (!Regex.IsMatch(input, RegexPattern))
+                {
+                    Expression = $"{input}";
+                    return;
+                }
+            }
+            Expression = $"{Expression}{input}";
+        }
     }
 
     private TMPro.TextMeshProUGUI GetTMPComponent(string name)
@@ -295,25 +223,59 @@ public class LayoutsManager : LayoutsManagerBase
         return ActiveLayoutTransform.GetComponentsInChildren<Transform>().Where(x => x.name.Equals(name)).First().GetComponentInChildren<TMPro.TextMeshProUGUI>();
     }
 
-
-
-
-    private void OnDisable()
+    private Dropdown GetDropDownBasedOnName(string name)
     {
-        foreach (var btn in buttonsInternalPuroposeVar)
+        return ActiveLayoutTransform.GetComponentsInChildren<Transform>().Where(x => x.name.Equals(name)).First().GetComponentInChildren<Dropdown>();
+    }
+
+    private void GetSelectedOption(Dropdown targetDropdown)
+    {
+        if(GetCurrentActiveLayout().name.Contains("Volume"))
         {
-            btn.onClick.RemoveAllListeners();
+            targetDropdown.onValueChanged.RemoveAllListeners();
+            targetDropdown.onValueChanged
+                .AddListener(
+                                delegate
+                                {
+                                    VolumeDropDownValueHandler(targetDropdown);
+                                });
+        }
+        if(GetCurrentActiveLayout().name.Contains("Length"))
+        {
+            targetDropdown.onValueChanged.RemoveAllListeners();
+            targetDropdown.onValueChanged
+                .AddListener(
+                                delegate
+                                {
+                                    LengthDropDownValueHandler(targetDropdown);
+                                });
         }
     }
 
+    private void AddSymbolToConverter(string input)
+    {
+        if (!Regex.IsMatch(Expression, @"[a-zA-Z!]+"))
+        {
+            if (Expression.Equals("0"))
+            {
+                Expression = $"{input}";
+            }
+            else
+            {
+                Expression = $"{Expression}{input}";
+            }
+        }
+    }
+    #endregion
 
+    #region StandartCalc
     private string PlusMinusProcessing()
     {
         string[] splitted;
         char operation;
         SplitExpression(out splitted, out operation);
 
-        if(splitted.Length > 1)
+        if (splitted.Length > 1)
         {
             splitted[1] = PlusMinusValidation(splitted[1]);
             return $"{splitted[0]}{operation}{splitted[1]}";
@@ -394,65 +356,6 @@ public class LayoutsManager : LayoutsManagerBase
         }
     }
 
-    private void AddSymbolToExpressionBasedOnLayout(string input)
-    {
-        if (!ActiveLayoutTransform.tag.Equals("StandartCalc"))
-        {
-            AddSymbolForConverter(input);
-            return;
-        }
-        AddSymbolForStandartCalc(input);
-    }
-
-    private void AddSymbolForConverter(string input)
-    {
-        if(ActiveLayoutTransform.tag.Equals("VolumeConverter"))
-        {
-            AddSymbolToVolumeConverter(input);
-        }
-        else
-        {
-            AddSymbolToLengthConverter(input);
-        }
-    }
-
-    private void AddSymbolToVolumeConverter(string input)
-    {
-        if (!Regex.IsMatch(Expression, @"[a-zA-Z!]+"))
-        {
-            if (Expression.Equals("0"))
-            {
-                Expression = $"{input}";
-            }
-            else
-            {
-                Expression = $"{Expression}{input}";
-            }
-        }
-    }
-
-    private void AddSymbolToLengthConverter(string input)
-    {
-        throw new NotImplementedException();
-    }
-
-    private void AddSymbolForStandartCalc(string input)
-    {
-        Debug.Log("Regex: " + Regex.IsMatch(Expression, @"[a-zA-Z!]+"));
-        if (!Regex.IsMatch(Expression, @"[a-zA-Z!]+"))
-        {
-            if (Expression.Equals("0"))
-            {
-                if (!Regex.IsMatch(input, RegexPattern))
-                {
-                    Expression = $"{input}";
-                    return;
-                }
-            }
-            Expression = $"{Expression}{input}";
-        }
-    }
-
     private string PlusMinusValidation(string valStr)
     {
         if (valStr.Contains('-'))
@@ -471,6 +374,244 @@ public class LayoutsManager : LayoutsManagerBase
         else
         {
             return;
+        }
+    }
+    #endregion
+
+    #region VolumeConverter
+
+
+    /// <summary>
+    /// VolumeFrom Dropdown options:
+    /// 1 - Cubic cm
+    /// 2 - Litres
+    /// 3 - Pints
+    /// 
+    /// VolumeTo Dropdown options:
+    /// 1 - Pints
+    /// 2 - Litres
+    /// 3 - Cubic cm
+    /// </summary>
+    /// <param name="volumeFromDropDown"></param>
+    /// <param name="volumeToDropDown"></param>
+    /// <returns></returns>
+    private string ConvertVolumeFromTo(Dropdown volumeFromDropDown, Dropdown volumeToDropDown)
+    {
+        float result = 0;
+        float expressionPart = 0;
+        GetSelectedOption(volumeFromDropDown);
+        GetSelectedOption(volumeToDropDown);
+
+
+        if (float.TryParse(Expression, out expressionPart))
+        {
+            //Cubic cm
+            if (optionVolumeSelectedFrom.Equals(0))
+            {
+                switch (optionVolumeSelectedTo)
+                {
+                    case 0:
+                        result = expressionPart * GlobalVars.CubicCmToPints;
+                        break;
+                    case 1:
+                        result = expressionPart;
+                        break;
+                    case 2:
+                        result = expressionPart * GlobalVars.CubicCmToLitres;
+                        break;
+                    default:
+                        result = 0.0f;
+                        break;
+                }
+            }
+            //Litres
+            else if (optionVolumeSelectedFrom.Equals(1))
+            {
+                switch (optionVolumeSelectedTo)
+                {
+                    case 0:
+                        result = expressionPart / GlobalVars.PintsToLitres;
+                        Debug.Log(result);
+                        break;
+                    case 1:
+                        result = expressionPart / GlobalVars.CubicCmToLitres;
+                        break;
+                    case 2:
+                        result = expressionPart;
+                        break;
+                    default:
+                        result = 0.0f;
+                        break;
+                }
+            }
+            //Pints
+            else if (optionVolumeSelectedFrom.Equals(2))
+            {
+                switch (optionVolumeSelectedTo)
+                {
+                    case 0:
+                        result = expressionPart;
+                        break;
+                    case 1:
+                        result = expressionPart / GlobalVars.CubicCmToPints;
+                        break;
+                    case 2:
+                        result = expressionPart * GlobalVars.PintsToLitres;
+                        break;
+                    default:
+                        result = 0.0f;
+                        break;
+                }
+            }
+        }
+
+        return result.ToString();
+    }
+
+    private void VolumeDropDownValueHandler(Dropdown target)
+    {
+        if (target.Equals(GetDropDownBasedOnName("VolumeFromDropDown")))
+        {
+            optionVolumeSelectedFrom = target.value;
+        }
+        if (target.Equals(GetDropDownBasedOnName("VolumeToDropDown")))
+        {
+            optionVolumeSelectedTo = target.value;
+        }
+    }
+
+    #endregion
+
+    #region LengthConverter
+
+    private string ConvertLengthFromTo(Dropdown lengthFromDropDown, Dropdown lengthToDropDown)
+    {
+        float result = 0;
+        float expressionPart = 0;
+        GetSelectedOption(lengthFromDropDown);
+        GetSelectedOption(lengthToDropDown);
+
+        if(float.TryParse(Expression, out expressionPart))
+        {
+            //Cm
+            if(optionLengthSelectedFrom.Equals(0))
+            {
+                switch (optionLengthSelectedTo)
+                {
+                    case 0:
+                        
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                    case 4:
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else if (optionLengthSelectedFrom.Equals(1))
+            {
+                switch (optionLengthSelectedTo)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                    case 4:
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else if (optionLengthSelectedFrom.Equals(2))
+            {
+                switch (optionLengthSelectedTo)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                    case 4:
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else if (optionLengthSelectedFrom.Equals(3))
+            {
+                switch (optionLengthSelectedTo)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                    case 4:
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else if (optionLengthSelectedFrom.Equals(4))
+            {
+                switch (optionLengthSelectedTo)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                    case 4:
+                        break;
+                    default:
+                        break;
+                }
+            }
+            //Meters
+            //Inches
+            //Feet
+            //Yards
+        }
+
+        return result.ToString();
+    }
+
+    private void LengthDropDownValueHandler(Dropdown target)
+    {
+        if (target.Equals(GetDropDownBasedOnName("LengthFromDropDown")))
+        {
+            optionLengthSelectedFrom = target.value;
+        }
+        if (target.Equals(GetDropDownBasedOnName("LengthToDropDown")))
+        {
+            optionLengthSelectedTo = target.value;
+        }
+    }
+
+    #endregion
+    private void OnDisable()
+    {
+        foreach (var btn in buttonsInternalPuroposeVar)
+        {
+            btn.onClick.RemoveAllListeners();
         }
     }
 }
