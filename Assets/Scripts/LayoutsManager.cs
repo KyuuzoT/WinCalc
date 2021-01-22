@@ -431,7 +431,6 @@ public class LayoutsManager : LayoutsManagerBase
                 {
                     case 0:
                         result = expressionPart / GlobalVars.PintsToLitres;
-                        Debug.Log(result);
                         break;
                     case 1:
                         result = expressionPart / GlobalVars.CubicCmToLitres;
@@ -553,7 +552,7 @@ public class LayoutsManager : LayoutsManagerBase
                         result = expressionPart;
                         break;
                     case 1:
-                        result = (expressionPart / GlobalVars.CmToInches) / GlobalVars.CmToMeters;
+                        result = (expressionPart / GlobalVars.CmToInches) * GlobalVars.CmToMeters;
                         break;
                     case 2:
                         result = expressionPart * GlobalVars.InchesToFeet;
@@ -578,7 +577,7 @@ public class LayoutsManager : LayoutsManagerBase
                         result = expressionPart / GlobalVars.InchesToFeet;
                         break;
                     case 1:
-                        result = (expressionPart / GlobalVars.CmToFeet) / GlobalVars.CmToMeters;
+                        result = (expressionPart / GlobalVars.CmToFeet) * GlobalVars.CmToMeters;
                         break;
                     case 2:
                         result = expressionPart;
@@ -603,7 +602,7 @@ public class LayoutsManager : LayoutsManagerBase
                         result = expressionPart / GlobalVars.InchesToYard;
                         break;
                     case 1:
-                        result = (expressionPart / GlobalVars.CmToYard) / GlobalVars.CmToMeters;
+                        result = (expressionPart / GlobalVars.CmToYard) * GlobalVars.CmToMeters;
                         break;
                     case 2:
                         result = expressionPart / GlobalVars.FeetToYard;
