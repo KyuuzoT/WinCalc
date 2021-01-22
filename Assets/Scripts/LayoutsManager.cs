@@ -499,96 +499,126 @@ public class LayoutsManager : LayoutsManagerBase
                 switch (optionLengthSelectedTo)
                 {
                     case 0:
-                        
+                        result = expressionPart * GlobalVars.CmToInches;
                         break;
                     case 1:
+                        result = expressionPart * GlobalVars.CmToMeters;
                         break;
                     case 2:
+                        result = expressionPart * GlobalVars.CmToFeet;
                         break;
                     case 3:
+                        result = expressionPart * GlobalVars.CmToYard;
                         break;
                     case 4:
+                        result = expressionPart;
                         break;
                     default:
+                        result = 0;
                         break;
                 }
             }
+            //Meters
             else if (optionLengthSelectedFrom.Equals(1))
             {
+                float metersToCm = expressionPart / GlobalVars.CmToMeters;
                 switch (optionLengthSelectedTo)
                 {
                     case 0:
+                        result = metersToCm * GlobalVars.CmToInches;
                         break;
                     case 1:
+                        result = expressionPart;
                         break;
                     case 2:
+                        result = metersToCm * GlobalVars.CmToFeet;
                         break;
                     case 3:
+                        result = metersToCm * GlobalVars.CmToYard;
                         break;
                     case 4:
+                        result = metersToCm;
                         break;
                     default:
+                        result = 0;
                         break;
                 }
             }
+            //Inches
             else if (optionLengthSelectedFrom.Equals(2))
             {
                 switch (optionLengthSelectedTo)
                 {
                     case 0:
+                        result = expressionPart;
                         break;
                     case 1:
+                        result = (expressionPart / GlobalVars.CmToInches) / GlobalVars.CmToMeters;
                         break;
                     case 2:
+                        result = expressionPart * GlobalVars.InchesToFeet;
                         break;
                     case 3:
+                        result = expressionPart * GlobalVars.InchesToYard;
                         break;
                     case 4:
+                        result = expressionPart / GlobalVars.CmToInches;
                         break;
                     default:
+                        result = 0;
                         break;
                 }
             }
+            //Feet
             else if (optionLengthSelectedFrom.Equals(3))
             {
                 switch (optionLengthSelectedTo)
                 {
                     case 0:
+                        result = expressionPart / GlobalVars.InchesToFeet;
                         break;
                     case 1:
+                        result = (expressionPart / GlobalVars.CmToFeet) / GlobalVars.CmToMeters;
                         break;
                     case 2:
+                        result = expressionPart;
                         break;
                     case 3:
+                        result = expressionPart * GlobalVars.FeetToYard;
                         break;
                     case 4:
+                        result = expressionPart / GlobalVars.CmToFeet;
                         break;
                     default:
+                        result = 0;
                         break;
                 }
             }
+            //Yards
             else if (optionLengthSelectedFrom.Equals(4))
             {
                 switch (optionLengthSelectedTo)
                 {
                     case 0:
+                        result = expressionPart / GlobalVars.InchesToYard;
                         break;
                     case 1:
+                        result = (expressionPart / GlobalVars.CmToYard) / GlobalVars.CmToMeters;
                         break;
                     case 2:
+                        result = expressionPart / GlobalVars.FeetToYard;
                         break;
                     case 3:
+                        result = expressionPart;
                         break;
                     case 4:
+                        result = expressionPart / GlobalVars.CmToYard;
                         break;
                     default:
+                        result = 0;
                         break;
                 }
             }
-            //Meters
-            //Inches
-            //Feet
-            //Yards
         }
 
         return result.ToString();

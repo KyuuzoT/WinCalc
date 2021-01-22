@@ -11,7 +11,8 @@ public static class GlobalVars
     public const float CubicCmToPints = 0.0021f;
     public const float CubicCmToLitres = 0.001f;
     public const float PintsToLitres = 0.47f;
-    public const float CmToMeters = 100.0f;
+
+    public const float CmToMeters = 0.01f;
     public const float CmToInches = 0.393701f;
     public const float CmToFeet = 0.032808f;
     public const float CmToYard = 0.010936f;
