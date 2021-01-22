@@ -84,7 +84,7 @@ public abstract class LayoutsManagerBase : MonoBehaviour
         }
     }
 
-    internal virtual void ChangeActiveLayout()
+    internal virtual void ChangeActiveLayout(Transform layoutTransform)
     {
 
     }

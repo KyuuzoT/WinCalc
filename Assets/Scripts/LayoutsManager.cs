@@ -26,6 +26,7 @@ public class LayoutsManager : LayoutsManagerBase
 
         if (!string.IsNullOrEmpty(Expression))
         {
+            //Debug.Log("ActiveLayoutTransform: " + ActiveLayoutTransform);
             if (ActiveLayoutTransform.tag.Equals("StandartCalc"))
             {
                 CalculationSequence.text = Expression;
